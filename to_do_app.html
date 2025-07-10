@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Basic To-Do App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    #taskInput {
+      width: 70%;
+      padding: 10px;
+      margin-right: 10px;
+    }
+
+    button {
+      padding: 10px 15px;
+      cursor: pointer;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 4px;
+    }
+
+    button.edit {
+      background-color: #2196F3;
+    }
+
+    button.delete {
+      background-color: #f44336;
+    }
+
+    button.complete {
+      background-color: #9c27b0;
+    }
+
+    .task {
+      background: #fff;
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .timestamp {
+      font-size: 0.8em;
+      color: gray;
+    }
+
+    .task-text {
+      flex-grow: 1;
+      margin-right: 10px;
+    }
+
+    h2 {
+      margin-top: 40px;
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 5px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📝 My To-Do List</h1>
+
+  <div>
+    <input type="text" id="taskInput" placeholder="Enter a new task..." />
+    <button onclick="addTask()">Add Task</button>
+  </div>
+
+  <h2>📌 Pending Tasks</h2>
+  <div id="pendingTasks"></div>
+
+  <h2>✅ Completed Tasks</h2>
+  <div id="completedTasks"></div>
+
+  <script>
+    let tasks = [];
+
+    function getCurrentTime() {
+      return new Date().toLocaleString();
+    }
+
+    function addTask() {
+      const input = document.getElementById("taskInput");
+      const text = input.value.trim();
+      if (text === "") return;
+
+      const task = {
+        id: Date.now(),
+        text,
+        createdAt: getCurrentTime(),
+        completedAt: null,
+        isCompleted: false
+      };
+
+      tasks.push(task);
+      input.value = "";
+      renderTasks();
+    }
+
+    function renderTasks() {
+      const pendingDiv = document.getElementById("pendingTasks");
+      const completedDiv = document.getElementById("completedTasks");
+
+      pendingDiv.innerHTML = "";
+      completedDiv.innerHTML = "";
+
+      tasks.forEach(task => {
+        const taskDiv = document.createElement("div");
+        taskDiv.className = "task";
+
+        const taskText = document.createElement("div");
+        taskText.className = "task-text";
+        taskText.innerHTML = `<strong>${task.text}</strong><br><span class="timestamp">Added: ${task.createdAt}</span>`;
+        if (task.isCompleted) {
+          taskText.innerHTML += `<br><span class="timestamp">Completed: ${task.completedAt}</span>`;
+        }
+
+        taskDiv.appendChild(taskText);
+
+        // Buttons
+        const editBtn = document.createElement("button");
+        editBtn.className = "edit";
+        editBtn.innerText = "Edit";
+        editBtn.onclick = () => editTask(task.id);
+
+        const delBtn = document.createElement("button");
+        delBtn.className = "delete";
+        delBtn.innerText = "Delete";
+        delBtn.onclick = () => deleteTask(task.id);
+
+        taskDiv.appendChild(editBtn);
+        taskDiv.appendChild(delBtn);
+
+        if (!task.isCompleted) {
+          const completeBtn = document.createElement("button");
+          completeBtn.className = "complete";
+          completeBtn.innerText = "Mark as Done";
+          completeBtn.onclick = () => markComplete(task.id);
+          taskDiv.appendChild(completeBtn);
+          pendingDiv.appendChild(taskDiv);
+        } else {
+          completedDiv.appendChild(taskDiv);
+        }
+      });
+    }
+
+    function markComplete(id) {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        task.isCompleted = true;
+        task.completedAt = getCurrentTime();
+      }
+      renderTasks();
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(t => t.id !== id);
+      renderTasks();
+    }
+
+    function editTask(id) {
+      const task = tasks.find(t => t.id === id);
+      const newText = prompt("Edit your task:", task.text);
+      if (newText !== null && newText.trim() !== "") {
+        task.text = newText.trim();
+        renderTasks();
+      }
+    }
+  </script>
+
+</body>
+</html>

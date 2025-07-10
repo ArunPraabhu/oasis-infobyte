@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple JS Auth</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 20px;
+    }
+    h2 {
+      color: #333;
+    }
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+    }
+    button {
+      padding: 10px;
+      width: 100%;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .link {
+      text-align: center;
+      margin-top: 10px;
+    }
+    .hidden {
+      display: none;
+    }
+    .logout-btn {
+      background: #f44336;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" id="loginPage">
+  <h2>Login</h2>
+  <input type="text" id="loginUsername" placeholder="Username" required>
+  <input type="password" id="loginPassword" placeholder="Password" required>
+  <button onclick="login()">Login</button>
+  <div class="link">Don't have an account? <a href="#" onclick="switchPage('register')">Register</a></div>
+</div>
+
+<div class="container hidden" id="registerPage">
+  <h2>Register</h2>
+  <input type="text" id="registerUsername" placeholder="Choose username" required>
+  <input type="password" id="registerPassword" placeholder="Choose password" required>
+  <button onclick="register()">Register</button>
+  <div class="link">Already have an account? <a href="#" onclick="switchPage('login')">Login</a></div>
+</div>
+
+<div class="container hidden" id="securePage">
+  <h2>Welcome, <span id="userNameDisplay"></span>!</h2>
+  <p>This is a protected page only visible to logged-in users.</p>
+  <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<script>
+  // Switch between pages
+  function switchPage(page) {
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("registerPage").classList.add("hidden");
+    document.getElementById("securePage").classList.add("hidden");
+
+    if (page === "login") {
+      document.getElementById("loginPage").classList.remove("hidden");
+    } else if (page === "register") {
+      document.getElementById("registerPage").classList.remove("hidden");
+    } else if (page === "secure") {
+      document.getElementById("securePage").classList.remove("hidden");
+    }
+  }
+
+  // Register user
+  function register() {
+    const username = document.getElementById("registerUsername").value;
+    const password = document.getElementById("registerPassword").value;
+
+    if (!username || !password) {
+      alert("Please fill in both fields.");
+      return;
+    }
+
+    if (localStorage.getItem(username)) {
+      alert("Username already exists.");
+      return;
+    }
+
+    localStorage.setItem(username, password);
+    alert("Registration successful. Please log in.");
+    switchPage("login");
+  }
+
+  // Login user
+  function login() {
+    const username = document.getElementById("loginUsername").value;
+    const password = document.getElementById("loginPassword").value;
+
+    const storedPassword = localStorage.getItem(username);
+
+    if (!storedPassword || storedPassword !== password) {
+      alert("Invalid username or password.");
+      return;
+    }
+
+    sessionStorage.setItem("loggedInUser", username);
+    showSecurePage();
+  }
+
+  // Show secure page
+  function showSecurePage() {
+    const user = sessionStorage.getItem("loggedInUser");
+    if (!user) {
+      alert("Please login first.");
+      switchPage("login");
+      return;
+    }
+
+    document.getElementById("userNameDisplay").innerText = user;
+    switchPage("secure");
+  }
+
+  // Logout
+  function logout() {
+    sessionStorage.removeItem("loggedInUser");
+    switchPage("login");
+  }
+
+  // Auto show secure page if already logged in
+  window.onload = () => {
+    const user = sessionStorage.getItem("loggedInUser");
+    if (user) {
+      showSecurePage();
+    } else {
+      switchPage("login");
+    }
+  };
+</script>
+
+</body>
+</html>
